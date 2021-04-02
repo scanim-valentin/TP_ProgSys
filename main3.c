@@ -21,7 +21,7 @@ int main(){
     struct timeval* restrict tp = (struct timeval*)malloc(sizeof(struct timeval));
     gettimeofday(tp,NULL);
     printf("Le temps : %lu\n",tp->tv_usec );
-    unsigned long tf, td, d;
+    unsigned long tf, td;
     int p_pere[2];
     int p_fils[2];
 	char buffer = ' '; //Création du buffer
@@ -73,8 +73,10 @@ int main(){
                 }
                 gettimeofday(tp,NULL);
                 tf = tp->tv_usec;
-                d = (long)16/((tf-td)*(long)1000);
-                printf("td = %lu, tf = %lu, Debit: %lu Mb/s\n",td,tf,d);
+                float delta = ((float)tf-(float)td);
+                
+                float d = NB_ECHANGES*64./delta;
+                printf("td = %lu, tf = %lu, delta = %f, Debit: %f Mb/s\n",td,tf,delta,d);
     }
 
     return 0;
