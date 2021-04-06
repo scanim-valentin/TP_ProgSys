@@ -9,14 +9,14 @@
 
 #define SEM_KEY 420
 #define SHM_KEY 421
-#define NB_ECHANGES 1000
+#define NB_ECHANGES 10
 
 int main (int argc, char **argv){
     
   
   int sem,PID,mode;
   if(argc != 2){
-        printf("Args : 1 pour le 1er processus / 0 pour un processus secondaire");
+        printf("Args : 1 pour le 1er processus / 0 pour un processus secondaire\n");
         exit(-1);
   }
   mode = atoi(argv[1]);
@@ -43,7 +43,7 @@ int main (int argc, char **argv){
   printf("%d : initialisation commune du buffer pour les operations sur le semaphore\n",PID);
   buf.sem_num = 0;
   buf.sem_flg = 0;
-  int PID = getpid();
+  PID = getpid();
   
   //Partie création et initialisation SHM
   printf("%d : Partie création et initialisation SHM\n",PID);
@@ -77,7 +77,7 @@ int main (int argc, char **argv){
   printf("%d : SHM = %d\n",PID,*shm);   
    /* attachement de la shm */
 
-  for(int i = 0; i< NB_ECHANGES; i++){
+  while(*shm< NB_ECHANGES){
       //P(S)
       //printf("instant 0 : Semaphore = %d\n",semctl(sem, 0, GETVAL));
       buf.sem_op = -1;
@@ -102,20 +102,21 @@ int main (int argc, char **argv){
       //printf("instant 2 : Semaphore = %d\n",semctl(sem, 0, GETVAL));
     }
     
-    
-    printf("%d : liberation semaphore\n",PID);
-    //destruction semaphore
-    if(semctl(sem,0,IPC_RMID,0)){
-      printf("%d : pb liberation semaphore ou semaphore deja detache\n",PID);
-    }
-    printf("%d : detache la SHM\n",PID);
-    /* detache la SHM */
-    if (shmdt(shm)){
-        printf("%d : pb pour detache la SHM ou SHM deja detache\n",PID);
-    }
-    printf("%d : destruction de la SHM\n",PID);
-    if (shmctl(shmid,IPC_RMID,0)){
-      printf("%d : pb destruction SHM ou SHM deja detruite\n",PID);
+    if(mode){
+        printf("%d : liberation semaphore\n",PID);
+        //destruction semaphore
+        if(semctl(sem,0,IPC_RMID,0)){
+        printf("%d : pb liberation semaphore ou semaphore deja detache\n",PID);
+        }
+        printf("%d : detache la SHM\n",PID);
+        /* detache la SHM */
+        if (shmdt(shm)){
+            printf("%d : pb pour detache la SHM ou SHM deja detache\n",PID);
+        }
+        printf("%d : destruction de la SHM\n",PID);
+        if (shmctl(shmid,IPC_RMID,0)){
+        printf("%d : pb destruction SHM ou SHM deja detruite\n",PID);
+        }
     }
     printf("%d : fin de tout\n",PID);
   return 0;
